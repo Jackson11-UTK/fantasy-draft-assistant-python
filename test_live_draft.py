@@ -21,7 +21,7 @@ draft = LiveDraft(
 
 
 # ---------------------------------------------------------
-# SIMULATE PICKS
+# START
 # ---------------------------------------------------------
 
 print("=" * 70)
@@ -32,28 +32,30 @@ print("Current pick:", draft.current_pick)
 print("Roster:", draft.get_roster())
 
 
-# Other team takes Gibbs
+# ---------------------------------------------------------
+# SIMULATE FIRST FOUR PICKS
+#
+# Karns draft slot = 4
+# ---------------------------------------------------------
+
 draft.draft_player(
     "Jahmyr Gibbs",
     my_pick=False,
 )
 
-# Other team takes Bijan
 draft.draft_player(
     "Bijan Robinson",
     my_pick=False,
 )
 
-# We take Ja'Marr
 draft.draft_player(
     "Ja'Marr Chase",
-    my_pick=True,
+    my_pick=False,
 )
 
-# Other team takes Puka
 draft.draft_player(
     "Puka Nacua",
-    my_pick=False,
+    my_pick=True,
 )
 
 
@@ -84,7 +86,39 @@ for player in draft.get_roster():
 
 
 # ---------------------------------------------------------
-# VERIFY THEY ARE GONE
+# TEAM ROSTERS
+# ---------------------------------------------------------
+
+print()
+print("=" * 70)
+print("TEAM ROSTERS")
+print("=" * 70)
+
+for team_slot in range(
+    1,
+    league["teams"] + 1,
+):
+
+    roster = draft.get_team_roster(
+        team_slot
+    )
+
+    if roster:
+
+        print()
+        print(f"Team {team_slot}:")
+
+        for player in roster:
+
+            print(
+                f"- Pick {player['pick']}: "
+                f"{player['player']} "
+                f"({player['position']})"
+            )
+
+
+# ---------------------------------------------------------
+# AVAILABILITY CHECK
 # ---------------------------------------------------------
 
 available = draft.get_available()
@@ -102,7 +136,38 @@ for player in [
     "Ja'Marr Chase",
     "Puka Nacua",
 ]:
+
     print(
         player,
-        "AVAILABLE?" if player in names else "DRAFTED",
+        "AVAILABLE?"
+        if player in names
+        else "DRAFTED",
+    )
+
+
+# ---------------------------------------------------------
+# PICK OWNERSHIP CHECK
+# ---------------------------------------------------------
+
+print()
+print("=" * 70)
+print("PICK OWNERSHIP CHECK")
+print("=" * 70)
+
+for pick in [
+    1,
+    2,
+    3,
+    4,
+    12,
+    13,
+    21,
+    24,
+    25,
+    28,
+]:
+
+    print(
+        f"Pick {pick}: "
+        f"Team {draft.team_slot_for_pick(pick)}"
     )
