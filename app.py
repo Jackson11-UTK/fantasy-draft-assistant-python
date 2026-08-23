@@ -808,628 +808,889 @@ def opponent_demand_label(
 
     return "Neutral"
 
+# =========================================================
+# MAIN TABS
+# =========================================================
+
+assistant_tab, draft_board_tab = st.tabs(
+    [
+        "Draft Assistant",
+        "League Draft Board",
+    ]
+)
+
+with assistant_tab:
 
 # =========================================================
-# TOP AVAILABLE
-# =========================================================
-
-st.subheader(
-    "Top Available"
-)
-
-
-top_available = (
-    recommendations
-    .head(7)
-    .copy()
-)
-
-
-leader = top_available.iloc[0]
-
-
-st.markdown(
-    (
-        '<div class="leader-box">'
-        f'Model leader: {leader["player"]} ({leader["position"]})'
-        f' &nbsp; | &nbsp; Decision Score {leader["decision_score"]:.1f}'
-        '</div>'
-    ),
-    unsafe_allow_html=True,
-)
-
-
-top_available[
-    "opponent_demand"
-] = (
+    # TOP AVAILABLE
+    # =========================================================
+    
+    st.subheader(
+        "Top Available"
+    )
+    
+    
+    top_available = (
+        recommendations
+        .head(7)
+        .copy()
+    )
+    
+    
+    leader = top_available.iloc[0]
+    
+    
+    st.markdown(
+        (
+            '<div class="leader-box">'
+            f'Model leader: {leader["player"]} ({leader["position"]})'
+            f' &nbsp; | &nbsp; Decision Score {leader["decision_score"]:.1f}'
+            '</div>'
+        ),
+        unsafe_allow_html=True,
+    )
+    
+    
     top_available[
-        "opponent_demand_index"
-    ]
-    .apply(
-        opponent_demand_label
+        "opponent_demand"
+    ] = (
+        top_available[
+            "opponent_demand_index"
+        ]
+        .apply(
+            opponent_demand_label
+        )
     )
-)
-
-
-top_cols = [
-    "player",
-    "position",
-    "bye",
-    "decision_score",
-    "espn_adp",
-    "ecr",
-    "base_survive_next_pick",
-    "opponent_demand",
-    "p_survive_next_pick",
-    "recommendation",
-]
-
-
-top_display = top_available[
-    top_cols
-].copy()
-
-
-top_display[
-    "base_survive_next_pick"
-] *= 100
-
-
-top_display[
-    "p_survive_next_pick"
-] *= 100
-
-
-top_display = top_display.rename(
-    columns={
-        "player": "Player",
-        "position": "Pos",
-        "bye": "Bye",
-        "decision_score": "Decision",
-        "espn_adp": "ESPN ADP",
-        "ecr": "ECR",
-        "base_survive_next_pick": "Base Survive %",
-        "opponent_demand": "Opponent Demand",
-        "p_survive_next_pick": "Adjusted Survive %",
-        "recommendation": "Recommendation",
-    }
-)
-
-
-st.dataframe(
-    top_display,
-    hide_index=True,
-    use_container_width=True,
-    column_config={
-        "Decision":
-            st.column_config.NumberColumn(
-                format="%.1f"
-            ),
-
-        "ESPN ADP":
-            st.column_config.NumberColumn(
-                format="%.1f"
-            ),
-
-        "ECR":
-            st.column_config.NumberColumn(
-                format="%.1f"
-            ),
-
-        "Base Survive %":
-            st.column_config.NumberColumn(
-                format="%.1f%%"
-            ),
-
-        "Adjusted Survive %":
-            st.column_config.NumberColumn(
-                format="%.1f%%"
-            ),
-    },
-)
-
-
-# =========================================================
-# QUICK DRAFT
-# =========================================================
-
-st.divider()
-
-st.subheader(
-    "Quick Draft"
-)
-
-st.markdown(
-    '<div class="section-subtitle">Top 8 available players by ESPN ADP</div>',
-    unsafe_allow_html=True,
-)
-
-
-quick_picks = (
-    recommendations[
+    
+    
+    top_cols = [
+        "player",
+        "position",
+        "bye",
+        "decision_score",
+        "espn_adp",
+        "ecr",
+        "base_survive_next_pick",
+        "opponent_demand",
+        "p_survive_next_pick",
+        "recommendation",
+    ]
+    
+    
+    top_display = top_available[
+        top_cols
+    ].copy()
+    
+    
+    top_display[
+        "base_survive_next_pick"
+    ] *= 100
+    
+    
+    top_display[
+        "p_survive_next_pick"
+    ] *= 100
+    
+    
+    top_display = top_display.rename(
+        columns={
+            "player": "Player",
+            "position": "Pos",
+            "bye": "Bye",
+            "decision_score": "Decision",
+            "espn_adp": "ESPN ADP",
+            "ecr": "ECR",
+            "base_survive_next_pick": "Base Survive %",
+            "opponent_demand": "Opponent Demand",
+            "p_survive_next_pick": "Adjusted Survive %",
+            "recommendation": "Recommendation",
+        }
+    )
+    
+    
+    st.dataframe(
+        top_display,
+        hide_index=True,
+        use_container_width=True,
+        column_config={
+            "Decision":
+                st.column_config.NumberColumn(
+                    format="%.1f"
+                ),
+    
+            "ESPN ADP":
+                st.column_config.NumberColumn(
+                    format="%.1f"
+                ),
+    
+            "ECR":
+                st.column_config.NumberColumn(
+                    format="%.1f"
+                ),
+    
+            "Base Survive %":
+                st.column_config.NumberColumn(
+                    format="%.1f%%"
+                ),
+    
+            "Adjusted Survive %":
+                st.column_config.NumberColumn(
+                    format="%.1f%%"
+                ),
+        },
+    )
+    
+    
+    # =========================================================
+    # QUICK DRAFT
+    # =========================================================
+    
+    st.divider()
+    
+    st.subheader(
+        "Quick Draft"
+    )
+    
+    st.markdown(
+        '<div class="section-subtitle">Top 8 available players by ESPN ADP</div>',
+        unsafe_allow_html=True,
+    )
+    
+    
+    quick_picks = (
         recommendations[
+            recommendations[
+                "espn_adp"
+            ].notna()
+        ]
+        .sort_values(
             "espn_adp"
-        ].notna()
-    ]
-    .sort_values(
-        "espn_adp"
+        )
+        .head(8)
+        .copy()
     )
-    .head(8)
-    .copy()
-)
-
-
-for start in range(
-    0,
-    len(quick_picks),
-    4,
-):
-
-    row_players = quick_picks.iloc[
-        start:start + 4
-    ]
-
-    cols = st.columns(4)
-
-
-    for col, (_, player) in zip(
-        cols,
-        row_players.iterrows(),
+    
+    
+    for start in range(
+        0,
+        len(quick_picks),
+        4,
     ):
-
-        with col:
-
-            pos_class = str(
-                player["position"]
-            ).lower()
-
-
-            bye_value = (
-                int(player["bye"])
-                if pd.notna(
-                    player["bye"]
+    
+        row_players = quick_picks.iloc[
+            start:start + 4
+        ]
+    
+        cols = st.columns(4)
+    
+    
+        for col, (_, player) in zip(
+            cols,
+            row_players.iterrows(),
+        ):
+    
+            with col:
+    
+                pos_class = str(
+                    player["position"]
+                ).lower()
+    
+    
+                bye_value = (
+                    int(player["bye"])
+                    if pd.notna(
+                        player["bye"]
+                    )
+                    else "-"
                 )
-                else "-"
-            )
-
-
-            conflict = bye_conflict_for_player(
-                player
-            )
-
-
-            conflict_players = (
-                bye_conflict_names(
+    
+    
+                conflict = bye_conflict_for_player(
                     player
                 )
-            )
-
-
-            if conflict:
-
-                names = ", ".join(
-                    conflict_players
+    
+    
+                conflict_players = (
+                    bye_conflict_names(
+                        player
+                    )
                 )
-
-                conflict_line = (
-                    f'<div class="bye-warning">'
-                    f'Bye conflict with {names}'
+    
+    
+                if conflict:
+    
+                    names = ", ".join(
+                        conflict_players
+                    )
+    
+                    conflict_line = (
+                        f'<div class="bye-warning">'
+                        f'Bye conflict with {names}'
+                        f'</div>'
+                    )
+    
+                else:
+    
+                    conflict_line = ""
+    
+    
+                card_html = (
+                    f'<div class="draft-card draft-card-{pos_class}">'
+                    f'<div class="player-name">{player["player"]}</div>'
+                    f'<div class="player-line">'
+                    f'{player["position"]} | '
+                    f'{player["team"]} | '
+                    f'Bye {bye_value}'
+                    f'</div>'
+                    f'<div class="player-line">'
+                    f'ADP {player["espn_adp"]:.1f} | '
+                    f'ECR {player["ecr"]:.1f}'
+                    f'</div>'
+                    f'{conflict_line}'
                     f'</div>'
                 )
-
-            else:
-
-                conflict_line = ""
-
-
-            card_html = (
-                f'<div class="draft-card draft-card-{pos_class}">'
-                f'<div class="player-name">{player["player"]}</div>'
-                f'<div class="player-line">'
-                f'{player["position"]} | '
-                f'{player["team"]} | '
-                f'Bye {bye_value}'
-                f'</div>'
-                f'<div class="player-line">'
-                f'ADP {player["espn_adp"]:.1f} | '
-                f'ECR {player["ecr"]:.1f}'
-                f'</div>'
-                f'{conflict_line}'
-                f'</div>'
-            )
-
-
-            st.markdown(
-                card_html,
-                unsafe_allow_html=True,
-            )
-
-
-            if st.button(
-                "Other Team",
-                key=f"quick_other_{player['player']}",
-                use_container_width=True,
-                disabled=is_my_pick,
-            ):
-
-                draft.draft_player(
-                    player["player"],
-                    my_pick=False,
+    
+    
+                st.markdown(
+                    card_html,
+                    unsafe_allow_html=True,
                 )
-
-                st.rerun()
-
-
-            if st.button(
-                "My Team",
-                key=f"quick_mine_{player['player']}",
-                use_container_width=True,
-                disabled=not is_my_pick,
-            ):
-
-                draft.draft_player(
-                    player["player"],
-                    my_pick=True,
-                )
-
-                st.rerun()
-
-
-# =========================================================
-# MY ROSTER
-# =========================================================
-
-st.divider()
-
-st.subheader(
-    "My Roster"
-)
-
-
-if not roster_df.empty:
-
-    roster_display = roster_df[
-        [
-            "player",
-            "team",
-            "position",
-            "bye",
+    
+    
+                if st.button(
+                    "Other Team",
+                    key=f"quick_other_{player['player']}",
+                    use_container_width=True,
+                    disabled=is_my_pick,
+                ):
+    
+                    draft.draft_player(
+                        player["player"],
+                        my_pick=False,
+                    )
+    
+                    st.rerun()
+    
+    
+                if st.button(
+                    "My Team",
+                    key=f"quick_mine_{player['player']}",
+                    use_container_width=True,
+                    disabled=not is_my_pick,
+                ):
+    
+                    draft.draft_player(
+                        player["player"],
+                        my_pick=True,
+                    )
+    
+                    st.rerun()
+    
+    
+    # =========================================================
+    # MY ROSTER
+    # =========================================================
+    
+    st.divider()
+    
+    st.subheader(
+        "My Roster"
+    )
+    
+    
+    if not roster_df.empty:
+    
+        roster_display = roster_df[
+            [
+                "player",
+                "team",
+                "position",
+                "bye",
+            ]
+        ].copy()
+    
+    
+        roster_display = roster_display.rename(
+            columns={
+                "player": "Player",
+                "team": "Team",
+                "position": "Pos",
+                "bye": "Bye",
+            }
+        )
+    
+    
+        st.dataframe(
+            roster_display,
+            hide_index=True,
+            use_container_width=True,
+        )
+    
+    else:
+    
+        st.info(
+            "No players drafted to your team yet."
+        )
+    
+    
+    # =========================================================
+    # AVAILABLE PLAYER BOARD
+    # =========================================================
+    
+    st.divider()
+    
+    st.subheader(
+        "Available Player Board"
+    )
+    
+    
+    # ---------------------------------------------------------
+    # POSITION FILTER
+    # ---------------------------------------------------------
+    
+    position_filter = st.multiselect(
+        "Positions",
+        options=[
+            "QB",
+            "RB",
+            "WR",
+            "TE",
+        ],
+        default=[
+            "QB",
+            "RB",
+            "WR",
+            "TE",
+        ],
+    )
+    
+    
+    # ---------------------------------------------------------
+    # PLAYER SEARCH
+    # ---------------------------------------------------------
+    
+    search = st.text_input(
+        "Player search",
+        placeholder="Type a player name...",
+    )
+    
+    
+    # ---------------------------------------------------------
+    # RECORD ANY AVAILABLE PLAYER
+    # ---------------------------------------------------------
+    
+    available_names = (
+        recommendations[
+            "player"
         ]
+        .dropna()
+        .drop_duplicates()
+        .tolist()
+    )
+    
+    
+    selected_player = st.selectbox(
+        "Record any available player",
+        options=available_names,
+    )
+    
+    
+    selected_row = recommendations[
+        recommendations[
+            "player"
+        ]
+        == selected_player
+    ].iloc[0]
+    
+    
+    selected_conflict = (
+        bye_conflict_for_player(
+            selected_row
+        )
+    )
+    
+    
+    if selected_conflict:
+    
+        names = ", ".join(
+            bye_conflict_names(
+                selected_row
+            )
+        )
+    
+    
+        bye_value = (
+            int(
+                selected_row["bye"]
+            )
+            if pd.notna(
+                selected_row["bye"]
+            )
+            else "-"
+        )
+    
+    
+        st.warning(
+            f"Bye-week overlap: {selected_player} is a "
+            f"{selected_row['position']} with Bye {bye_value}. "
+            f"You already have {names} at the same position "
+            f"with that bye. You can still draft this player."
+        )
+    
+    
+    button_col1, button_col2 = st.columns(2)
+    
+    
+    with button_col1:
+    
+        if st.button(
+            "Drafted by Other Team",
+            key="search_other",
+            use_container_width=True,
+            disabled=is_my_pick,
+        ):
+    
+            draft.draft_player(
+                selected_player,
+                my_pick=False,
+            )
+    
+            st.rerun()
+    
+    
+    with button_col2:
+    
+        if st.button(
+            "Draft to My Team",
+            key="search_mine",
+            use_container_width=True,
+            disabled=not is_my_pick,
+        ):
+    
+            draft.draft_player(
+                selected_player,
+                my_pick=True,
+            )
+    
+            st.rerun()
+    
+    
+    # ---------------------------------------------------------
+    # FILTER MAIN TABLE
+    # ---------------------------------------------------------
+    
+    display_board = recommendations[
+        recommendations[
+            "position"
+        ].isin(
+            position_filter
+        )
     ].copy()
-
-
-    roster_display = roster_display.rename(
+    
+    
+    if search:
+    
+        display_board = display_board[
+            display_board[
+                "player"
+            ]
+            .str.contains(
+                search,
+                case=False,
+                na=False,
+            )
+        ]
+    
+    
+    # ---------------------------------------------------------
+    # BYE CONFLICT
+    # ---------------------------------------------------------
+    
+    display_board[
+        "bye_conflict"
+    ] = display_board.apply(
+        bye_conflict_for_player,
+        axis=1,
+    )
+    
+    
+    display_board[
+        "bye_conflict"
+    ] = display_board[
+        "bye_conflict"
+    ].map(
+        {
+            True: "YES",
+            False: "",
+        }
+    )
+    
+    
+    # ---------------------------------------------------------
+    # OPPONENT DEMAND
+    # ---------------------------------------------------------
+    
+    display_board[
+        "opponent_demand"
+    ] = (
+        display_board[
+            "opponent_demand_index"
+        ]
+        .apply(
+            opponent_demand_label
+        )
+    )
+    
+    
+    # ---------------------------------------------------------
+    # CONVERT PROBABILITIES TO PERCENTAGES
+    # ---------------------------------------------------------
+    
+    display_board[
+        "base_survive_next_pick"
+    ] *= 100
+    
+    
+    display_board[
+        "p_survive_next_pick"
+    ] *= 100
+    
+    
+    # ---------------------------------------------------------
+    # DISPLAY COLUMNS
+    # ---------------------------------------------------------
+    
+    display_cols = [
+        "player",
+        "team",
+        "position",
+        "bye",
+        "ecr",
+        "espn_adp",
+        "market_gap",
+        "vor",
+        "decision_score",
+        "base_survive_next_pick",
+        "opponent_demand",
+        "p_survive_next_pick",
+        "bye_conflict",
+        "recommendation",
+    ]
+    
+    
+    display_board = display_board[
+        display_cols
+    ].copy()
+    
+    
+    display_board = display_board.rename(
         columns={
             "player": "Player",
             "team": "Team",
             "position": "Pos",
             "bye": "Bye",
+            "ecr": "ECR",
+            "espn_adp": "ESPN ADP",
+            "market_gap": "ADP Gap",
+            "vor": "VOR",
+            "decision_score": "Decision",
+            "base_survive_next_pick": "Base Survive %",
+            "opponent_demand": "Opponent Demand",
+            "p_survive_next_pick": "Adjusted Survive %",
+            "bye_conflict": "Bye Conflict",
+            "recommendation": "Recommendation",
         }
     )
-
-
+    
+    
     st.dataframe(
-        roster_display,
+        display_board,
         hide_index=True,
         use_container_width=True,
-    )
-
-else:
-
-    st.info(
-        "No players drafted to your team yet."
-    )
-
+        height=700,
+        column_config={
+            "ECR":
+                st.column_config.NumberColumn(
+                    format="%.1f"
+                ),
+    
+            "ESPN ADP":
+                st.column_config.NumberColumn(
+                    format="%.1f"
+                ),
+    
+            "ADP Gap":
+                st.column_config.NumberColumn(
+                    format="%+.1f"
+                ),
+    
+            "VOR":
+                st.column_config.NumberColumn(
+                    format="%.1f"
+                ),
+    
+            "Decision":
+                st.column_config.NumberColumn(
+                    format="%.1f"
+                ),
+    
+            "Base Survive %":
+                st.column_config.NumberColumn(
+                    format="%.1f%%"
+                ),
+    
+            "Adjusted Survive %":
+                st.column_config.NumberColumn(
+                    format="%.1f%%"
+                ),
+        },
+)
 
 # =========================================================
-# AVAILABLE PLAYER BOARD
+# TAB 2 - LEAGUE DRAFT BOARD
 # =========================================================
 
-st.divider()
+with draft_board_tab:
 
-st.subheader(
-    "Available Player Board"
-)
-
-
-# ---------------------------------------------------------
-# POSITION FILTER
-# ---------------------------------------------------------
-
-position_filter = st.multiselect(
-    "Positions",
-    options=[
-        "QB",
-        "RB",
-        "WR",
-        "TE",
-    ],
-    default=[
-        "QB",
-        "RB",
-        "WR",
-        "TE",
-    ],
-)
-
-
-# ---------------------------------------------------------
-# PLAYER SEARCH
-# ---------------------------------------------------------
-
-search = st.text_input(
-    "Player search",
-    placeholder="Type a player name...",
-)
-
-
-# ---------------------------------------------------------
-# RECORD ANY AVAILABLE PLAYER
-# ---------------------------------------------------------
-
-available_names = (
-    recommendations[
-        "player"
-    ]
-    .dropna()
-    .drop_duplicates()
-    .tolist()
-)
-
-
-selected_player = st.selectbox(
-    "Record any available player",
-    options=available_names,
-)
-
-
-selected_row = recommendations[
-    recommendations[
-        "player"
-    ]
-    == selected_player
-].iloc[0]
-
-
-selected_conflict = (
-    bye_conflict_for_player(
-        selected_row
+    st.subheader(
+        "League Draft Board"
     )
-)
+
+    st.caption(
+        "Live view of every team's drafted players."
+    )
+
+    all_rosters = (
+        draft.get_all_team_rosters()
+    )
+
+    my_slot = league.get(
+        "draft_slot"
+    )
 
 
-if selected_conflict:
+    # -----------------------------------------------------
+    # TEAM NAMES
+    #
+    # Karns names can be replaced later with actual
+    # owner/team names once we want them.
+    # -----------------------------------------------------
 
-    names = ", ".join(
-        bye_conflict_names(
-            selected_row
+    team_names = {
+        slot: (
+            "My Team"
+            if slot == my_slot
+            else f"Team {slot}"
+        )
+        for slot in range(
+            1,
+            league["teams"] + 1,
+        )
+    }
+
+
+    # -----------------------------------------------------
+    # BOARD STYLING
+    # -----------------------------------------------------
+
+    st.markdown(
+        """
+        <style>
+
+        .draft-board-team {
+            background: #0f223d;
+            border: 1px solid #314966;
+            border-radius: 9px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .draft-board-my-team {
+            border: 2px solid #6ea8ff;
+        }
+
+        .draft-board-header {
+            background: #162f52;
+            color: #ffffff;
+            font-weight: 800;
+            padding: 9px 10px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .draft-board-player {
+            color: #111827;
+            padding: 8px 9px;
+            border-top: 1px solid rgba(0,0,0,0.15);
+        }
+
+        .draft-board-player-name {
+            font-weight: 800;
+            font-size: 0.86rem;
+        }
+
+        .draft-board-player-meta {
+            font-size: 0.72rem;
+            margin-top: 2px;
+            color: rgba(17,24,39,0.78);
+        }
+
+        .draft-board-qb {
+            background: #d4869c;
+        }
+
+        .draft-board-rb {
+            background: #86cfb7;
+        }
+
+        .draft-board-wr {
+            background: #68afd1;
+        }
+
+        .draft-board-te {
+            background: #dfa65e;
+        }
+
+        .draft-board-empty {
+            padding: 12px 10px;
+            color: #9fb0c3;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+    # -----------------------------------------------------
+    # RENDER TEAM COLUMNS
+    # -----------------------------------------------------
+
+    team_slots = list(
+        range(
+            1,
+            league["teams"] + 1,
         )
     )
 
-
-    bye_value = (
-        int(
-            selected_row["bye"]
-        )
-        if pd.notna(
-            selected_row["bye"]
-        )
-        else "-"
-    )
+    teams_per_row = 4
 
 
-    st.warning(
-        f"Bye-week overlap: {selected_player} is a "
-        f"{selected_row['position']} with Bye {bye_value}. "
-        f"You already have {names} at the same position "
-        f"with that bye. You can still draft this player."
-    )
-
-
-button_col1, button_col2 = st.columns(2)
-
-
-with button_col1:
-
-    if st.button(
-        "Drafted by Other Team",
-        key="search_other",
-        use_container_width=True,
-        disabled=is_my_pick,
+    for start in range(
+        0,
+        len(team_slots),
+        teams_per_row,
     ):
 
-        draft.draft_player(
-            selected_player,
-            my_pick=False,
-        )
-
-        st.rerun()
-
-
-with button_col2:
-
-    if st.button(
-        "Draft to My Team",
-        key="search_mine",
-        use_container_width=True,
-        disabled=not is_my_pick,
-    ):
-
-        draft.draft_player(
-            selected_player,
-            my_pick=True,
-        )
-
-        st.rerun()
-
-
-# ---------------------------------------------------------
-# FILTER MAIN TABLE
-# ---------------------------------------------------------
-
-display_board = recommendations[
-    recommendations[
-        "position"
-    ].isin(
-        position_filter
-    )
-].copy()
-
-
-if search:
-
-    display_board = display_board[
-        display_board[
-            "player"
+        row_slots = team_slots[
+            start:start + teams_per_row
         ]
-        .str.contains(
-            search,
-            case=False,
-            na=False,
+
+        cols = st.columns(
+            len(row_slots)
         )
-    ]
 
 
-# ---------------------------------------------------------
-# BYE CONFLICT
-# ---------------------------------------------------------
+        for col, team_slot in zip(
+            cols,
+            row_slots,
+        ):
 
-display_board[
-    "bye_conflict"
-] = display_board.apply(
-    bye_conflict_for_player,
-    axis=1,
-)
+            with col:
 
+                roster = all_rosters.get(
+                    team_slot,
+                    [],
+                )
 
-display_board[
-    "bye_conflict"
-] = display_board[
-    "bye_conflict"
-].map(
-    {
-        True: "YES",
-        False: "",
-    }
-)
+                team_class = (
+                    " draft-board-my-team"
+                    if team_slot == my_slot
+                    else ""
+                )
 
 
-# ---------------------------------------------------------
-# OPPONENT DEMAND
-# ---------------------------------------------------------
-
-display_board[
-    "opponent_demand"
-] = (
-    display_board[
-        "opponent_demand_index"
-    ]
-    .apply(
-        opponent_demand_label
-    )
-)
+                html = (
+                    f'<div class="draft-board-team{team_class}">'
+                    f'<div class="draft-board-header">'
+                    f'{team_names[team_slot]}'
+                    f'</div>'
+                )
 
 
-# ---------------------------------------------------------
-# CONVERT PROBABILITIES TO PERCENTAGES
-# ---------------------------------------------------------
+                if roster:
 
-display_board[
-    "base_survive_next_pick"
-] *= 100
+                    for player in roster:
 
+                        player_name = (
+                            player["player"]
+                        )
 
-display_board[
-    "p_survive_next_pick"
-] *= 100
+                        position = (
+                            player["position"]
+                        )
 
+                        pick_number = (
+                            player["pick"]
+                        )
 
-# ---------------------------------------------------------
-# DISPLAY COLUMNS
-# ---------------------------------------------------------
-
-display_cols = [
-    "player",
-    "team",
-    "position",
-    "bye",
-    "ecr",
-    "espn_adp",
-    "market_gap",
-    "vor",
-    "decision_score",
-    "base_survive_next_pick",
-    "opponent_demand",
-    "p_survive_next_pick",
-    "bye_conflict",
-    "recommendation",
-]
+                        position_class = (
+                            str(position)
+                            .lower()
+                        )
 
 
-display_board = display_board[
-    display_cols
-].copy()
+                        player_match = board[
+                            board["player"]
+                            == player_name
+                        ]
 
 
-display_board = display_board.rename(
-    columns={
-        "player": "Player",
-        "team": "Team",
-        "position": "Pos",
-        "bye": "Bye",
-        "ecr": "ECR",
-        "espn_adp": "ESPN ADP",
-        "market_gap": "ADP Gap",
-        "vor": "VOR",
-        "decision_score": "Decision",
-        "base_survive_next_pick": "Base Survive %",
-        "opponent_demand": "Opponent Demand",
-        "p_survive_next_pick": "Adjusted Survive %",
-        "bye_conflict": "Bye Conflict",
-        "recommendation": "Recommendation",
-    }
-)
+                        if not player_match.empty:
+
+                            nfl_team = (
+                                player_match
+                                .iloc[0]
+                                .get(
+                                    "team",
+                                    "-"
+                                )
+                            )
+
+                        else:
+
+                            nfl_team = "-"
 
 
-st.dataframe(
-    display_board,
-    hide_index=True,
-    use_container_width=True,
-    height=700,
-    column_config={
-        "ECR":
-            st.column_config.NumberColumn(
-                format="%.1f"
-            ),
+                        html += (
+                            f'<div class="draft-board-player '
+                            f'draft-board-{position_class}">'
+                            f'<div class="draft-board-player-name">'
+                            f'{player_name}'
+                            f'</div>'
+                            f'<div class="draft-board-player-meta">'
+                            f'{position} | '
+                            f'{nfl_team} | '
+                            f'Pick {pick_number}'
+                            f'</div>'
+                            f'</div>'
+                        )
 
-        "ESPN ADP":
-            st.column_config.NumberColumn(
-                format="%.1f"
-            ),
+                else:
 
-        "ADP Gap":
-            st.column_config.NumberColumn(
-                format="%+.1f"
-            ),
+                    html += (
+                        '<div class="draft-board-empty">'
+                        'No picks yet'
+                        '</div>'
+                    )
 
-        "VOR":
-            st.column_config.NumberColumn(
-                format="%.1f"
-            ),
 
-        "Decision":
-            st.column_config.NumberColumn(
-                format="%.1f"
-            ),
+                html += '</div>'
 
-        "Base Survive %":
-            st.column_config.NumberColumn(
-                format="%.1f%%"
-            ),
 
-        "Adjusted Survive %":
-            st.column_config.NumberColumn(
-                format="%.1f%%"
-            ),
-    },
-)
+                st.markdown(
+                    html,
+                    unsafe_allow_html=True,
+                )
