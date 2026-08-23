@@ -15,26 +15,303 @@ PLAYER_FILE = Path("data/processed/player_board.csv")
 RAZZBALL_FILE = Path("data/raw/razzball.csv")
 
 
-# ---------------------------------------------------------
+# =========================================================
 # PAGE SETUP
-# ---------------------------------------------------------
+# =========================================================
 
 st.set_page_config(
     page_title="Fantasy Draft Assistant 2026",
-    page_icon="🏈",
     layout="wide",
 )
 
-st.title("Fantasy Draft Assistant 2026")
+
+# =========================================================
+# CUSTOM STYLING
+# =========================================================
+
+st.markdown(
+    """
+    <style>
+
+    /* --------------------------------------------------
+       APP BACKGROUND
+       -------------------------------------------------- */
+
+    .stApp {
+        background: #081a33;
+        color: #f8fafc;
+    }
+
+    .block-container {
+        max-width: 1500px;
+        padding-top: 1.4rem;
+        padding-left: 1.7rem;
+        padding-right: 1.7rem;
+        padding-bottom: 3rem;
+    }
 
 
-# ---------------------------------------------------------
+    /* --------------------------------------------------
+       GLOBAL TEXT
+       -------------------------------------------------- */
+
+    html,
+    body,
+    [class*="css"] {
+        color: #f8fafc;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        color: #ffffff !important;
+        font-weight: 750;
+    }
+
+    p,
+    label,
+    span {
+        color: inherit;
+    }
+
+    .main-title {
+        color: #ffffff;
+        font-size: 2.55rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-subtitle {
+        color: #b7c4d8;
+        font-size: 0.9rem;
+        margin-top: -0.45rem;
+        margin-bottom: 0.9rem;
+    }
+
+
+    /* --------------------------------------------------
+       SIDEBAR
+       -------------------------------------------------- */
+
+    section[data-testid="stSidebar"] {
+        background: #0d2342;
+        border-right: 1px solid #203b60;
+    }
+
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span {
+        color: #f8fafc !important;
+    }
+
+
+    /* --------------------------------------------------
+       METRIC CARDS
+       -------------------------------------------------- */
+
+    div[data-testid="stMetric"] {
+        background: #132b4c;
+        border: 1px solid #2b476b;
+        padding: 11px 13px;
+        border-radius: 10px;
+    }
+
+    div[data-testid="stMetric"] label {
+        color: #c6d2e3 !important;
+    }
+
+    div[data-testid="stMetricValue"] {
+        color: #ffffff !important;
+    }
+
+
+    /* --------------------------------------------------
+       STATUS BOXES
+       -------------------------------------------------- */
+
+    .status-box {
+        background: #132b4c;
+        border: 1px solid #2b476b;
+        border-left: 5px solid #3b82f6;
+        border-radius: 9px;
+        padding: 11px 14px;
+        color: #ffffff;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+
+    .on-clock {
+        border-left-color: #22c55e;
+        background: #123726;
+    }
+
+    .next-up {
+        border-left-color: #f59e0b;
+        background: #3d2d10;
+    }
+
+
+    /* --------------------------------------------------
+       LEADER BOX
+       -------------------------------------------------- */
+
+    .leader-box {
+        background: #123726;
+        border: 1px solid #2d6b49;
+        border-left: 5px solid #22c55e;
+        border-radius: 9px;
+        padding: 10px 13px;
+        color: #ffffff;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+
+    /* --------------------------------------------------
+       QUICK DRAFT CARDS
+       -------------------------------------------------- */
+
+    .draft-card {
+        background: #f8fafc;
+        border: 1px solid #d7deea;
+        border-radius: 10px;
+        padding: 12px 14px;
+        min-height: 108px;
+        margin-bottom: 6px;
+        color: #111827;
+        border-left: 6px solid #64748b;
+    }
+
+    .draft-card-rb {
+        border-left-color: #22c55e;
+    }
+
+    .draft-card-wr {
+        border-left-color: #3b82f6;
+    }
+
+    .draft-card-qb {
+        border-left-color: #ef4444;
+    }
+
+    .draft-card-te {
+        border-left-color: #a855f7;
+    }
+
+    .player-name {
+        color: #111827;
+        font-size: 1rem;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
+    .player-line {
+        color: #4b5563;
+        font-size: 0.84rem;
+        line-height: 1.5;
+    }
+
+    .bye-warning {
+        color: #b45309;
+        font-size: 0.8rem;
+        font-weight: 750;
+        margin-top: 5px;
+    }
+
+
+    /* --------------------------------------------------
+       BUTTONS
+       -------------------------------------------------- */
+
+    div.stButton > button {
+        border-radius: 8px;
+        font-weight: 650;
+        border: 1px solid #3b82f6;
+    }
+
+    div.stButton > button:not(:disabled) {
+        background: #0f2b50;
+        color: #ffffff;
+    }
+
+    div.stButton > button:not(:disabled):hover {
+        background: #173d6b;
+        border-color: #60a5fa;
+        color: #ffffff;
+    }
+
+    div.stButton > button:disabled {
+        background: #e5e7eb;
+        color: #9ca3af;
+        border-color: #d1d5db;
+    }
+
+
+    /* --------------------------------------------------
+       INPUTS
+       -------------------------------------------------- */
+
+    div[data-baseweb="select"] > div,
+    div[data-baseweb="input"] > div,
+    input {
+        background-color: #102846 !important;
+        color: #ffffff !important;
+        border-color: #355275 !important;
+    }
+
+    input::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    [data-testid="stMultiSelect"] span {
+        color: #ffffff !important;
+    }
+
+
+    /* --------------------------------------------------
+       DATAFRAMES / TABLE AREA
+       -------------------------------------------------- */
+
+    div[data-testid="stDataFrame"] {
+        background: #102846;
+        border: 1px solid #2b476b;
+        border-radius: 9px;
+        overflow: hidden;
+    }
+
+
+    /* --------------------------------------------------
+       DIVIDERS
+       -------------------------------------------------- */
+
+    hr {
+        border-color: #284465;
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    '<div class="main-title">Fantasy Draft Assistant 2026</div>',
+    unsafe_allow_html=True,
+)
+
+# =========================================================
 # LOAD DATA
-# ---------------------------------------------------------
+# =========================================================
 
 @st.cache_data
 def load_board():
-    board = pd.read_csv(PLAYER_FILE)
+
+    board = pd.read_csv(
+        PLAYER_FILE
+    )
 
     projections = load_razzball(
         RAZZBALL_FILE
@@ -51,9 +328,9 @@ def load_board():
 board = load_board()
 
 
-# ---------------------------------------------------------
+# =========================================================
 # LEAGUE SETTINGS
-# ---------------------------------------------------------
+# =========================================================
 
 league_key = st.sidebar.selectbox(
     "League",
@@ -91,9 +368,9 @@ if league.get("draft_slot"):
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # LIVE DRAFT STATE
-# ---------------------------------------------------------
+# =========================================================
 
 state_key = f"live_draft_{league_key}"
 
@@ -111,25 +388,88 @@ draft = st.session_state[state_key]
 draft.league = league
 
 
-if st.sidebar.button(
-    "Reset Draft",
-    use_container_width=True,
-):
+# =========================================================
+# RESET / UNDO CONTROLS
+# =========================================================
 
-    draft.reset()
-    st.rerun()
+if "confirm_reset" not in st.session_state:
+    st.session_state.confirm_reset = False
+
+
+# ---------------------------------------------------------
+# NORMAL RESET BUTTON
+# ---------------------------------------------------------
+
+if not st.session_state.confirm_reset:
+
+    if st.sidebar.button(
+        "Reset Draft",
+        use_container_width=True,
+    ):
+        st.session_state.confirm_reset = True
+        st.rerun()
+
+
+# ---------------------------------------------------------
+# RESET CONFIRMATION
+# ---------------------------------------------------------
+
+else:
+
+    st.sidebar.error(
+        "RESET ENTIRE DRAFT?"
+    )
+
+    st.sidebar.caption(
+        "This removes every recorded pick and your entire roster."
+    )
+
+    reset_cancel_col, reset_confirm_col = st.sidebar.columns(2)
+
+    with reset_cancel_col:
+
+        if st.button(
+            "Cancel",
+            key="cancel_reset",
+            use_container_width=True,
+        ):
+            st.session_state.confirm_reset = False
+            st.rerun()
+
+    with reset_confirm_col:
+
+        if st.button(
+            "Confirm Reset",
+            key="confirm_reset_button",
+            use_container_width=True,
+            type="primary",
+        ):
+            draft.reset()
+            st.session_state.confirm_reset = False
+            st.rerun()
+
+
+# ---------------------------------------------------------
+# UNDO LAST PICK
+# ---------------------------------------------------------
 
 if st.sidebar.button(
-    "↩️ Undo Last Pick",
+    "Undo Last Pick",
     use_container_width=True,
     disabled=len(draft.get_drafted()) == 0,
 ):
+
     draft.undo_last_pick()
+
+    # If reset confirmation happened to be open,
+    # close it when another draft action occurs.
+    st.session_state.confirm_reset = False
+
     st.rerun()
 
-# ---------------------------------------------------------
+# =========================================================
 # DRAFT TURN MATH
-# ---------------------------------------------------------
+# =========================================================
 
 def my_pick_numbers(
     teams: int,
@@ -170,6 +510,7 @@ draft_slot = league.get(
     "draft_slot"
 )
 
+
 if draft_slot is None:
 
     st.error(
@@ -187,6 +528,7 @@ my_picks = my_pick_numbers(
 
 current_pick = draft.current_pick
 
+
 is_my_pick = (
     current_pick in my_picks
 )
@@ -199,30 +541,38 @@ future_my_picks = [
 ]
 
 
-if future_my_picks:
-
-    next_my_pick = future_my_picks[0]
-
-else:
-
-    next_my_pick = None
+next_my_pick = (
+    future_my_picks[0]
+    if future_my_picks
+    else None
+)
 
 
-if next_my_pick is not None:
-
-    picks_until_my_turn = (
-        next_my_pick
-        - current_pick
-    )
-
-else:
-
-    picks_until_my_turn = None
+picks_until_my_turn = (
+    next_my_pick - current_pick
+    if next_my_pick is not None
+    else None
+)
 
 
-# ---------------------------------------------------------
-# SIDEBAR DRAFT STATUS
-# ---------------------------------------------------------
+future_after_next = [
+    pick
+    for pick in my_picks
+    if next_my_pick is not None
+    and pick > next_my_pick
+]
+
+
+following_my_pick = (
+    future_after_next[0]
+    if future_after_next
+    else None
+)
+
+
+# =========================================================
+# SIDEBAR STATUS
+# =========================================================
 
 st.sidebar.divider()
 
@@ -257,6 +607,13 @@ else:
     )
 
 
+if following_my_pick is not None:
+
+    st.sidebar.caption(
+        f"Following pick: {following_my_pick}"
+    )
+
+
 st.sidebar.metric(
     "Players Drafted",
     len(draft.get_drafted()),
@@ -269,35 +626,35 @@ st.sidebar.metric(
 )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # TURN BANNER
-# ---------------------------------------------------------
+# =========================================================
 
 if is_my_pick:
 
-    st.success(
-        f"🔥 YOU'RE ON THE CLOCK — PICK {current_pick}"
+    st.markdown(
+        f'<div class="status-box on-clock">YOU ARE ON THE CLOCK — PICK {current_pick}</div>',
+        unsafe_allow_html=True,
+    )
+
+elif picks_until_my_turn == 1:
+
+    st.markdown(
+        f'<div class="status-box next-up">YOU ARE NEXT — PICK {next_my_pick}</div>',
+        unsafe_allow_html=True,
     )
 
 else:
 
-    if picks_until_my_turn == 1:
-
-        st.warning(
-            f"⏳ YOU'RE NEXT — Pick {next_my_pick}"
-        )
-
-    else:
-
-        st.info(
-            f"Next pick: {next_my_pick} • "
-            f"{picks_until_my_turn} picks until your turn"
-        )
+    st.markdown(
+        f'<div class="status-box">Next pick: {next_my_pick} &nbsp;&nbsp; | &nbsp;&nbsp; {picks_until_my_turn} picks until your turn</div>',
+        unsafe_allow_html=True,
+    )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # RECOMMENDATIONS
-# ---------------------------------------------------------
+# =========================================================
 
 try:
 
@@ -320,153 +677,271 @@ if recommendations.empty:
     st.stop()
 
 
-# ---------------------------------------------------------
-# BEST PICK
-# ---------------------------------------------------------
+# =========================================================
+# CURRENT ROSTER DETAILS
+# =========================================================
 
-best = recommendations.iloc[0]
-
-
-st.subheader(
-    "Best Pick Right Now"
-)
+roster = draft.get_roster()
 
 
-col1, col2, col3, col4 = st.columns(4)
+if roster:
 
-
-with col1:
-
-    st.metric(
-        "Player",
-        best["player"],
+    roster_df = pd.DataFrame(
+        roster
     )
 
-
-with col2:
-
-    st.metric(
-        "Position",
-        best["position"],
-    )
-
-
-with col3:
-
-    st.metric(
-        "Decision Score",
-        f"{best['decision_score']:.1f}",
-    )
-
-
-with col4:
-
-    survival = (
-        best["p_survive_next_pick"]
-        * 100
-    )
-
-    st.metric(
-        "Chance Available Next Pick",
-        f"{survival:.1f}%",
-    )
-
-
-st.success(
-    f"{best['recommendation']}: "
-    f"{best['player']} "
-    f"({best['position']})"
-)
-
-
-# ---------------------------------------------------------
-# ALTERNATIVES
-# ---------------------------------------------------------
-
-alternatives = recommendations[
-    recommendations[
-        "recommendation"
-    ].isin(
-        [
-            "STRONG ALTERNATIVE",
-            "ALTERNATIVE",
+    roster_details = (
+        board[
+            [
+                "player",
+                "team",
+                "bye",
+            ]
         ]
-    )
-].head(5)
-
-
-if not alternatives.empty:
-
-    st.subheader(
-        "Alternatives"
+        .drop_duplicates(
+            subset=["player"]
+        )
     )
 
-    alt_display = alternatives[
-        [
+    roster_df = roster_df.merge(
+        roster_details,
+        on="player",
+        how="left",
+    )
+
+else:
+
+    roster_df = pd.DataFrame(
+        columns=[
             "player",
             "position",
-            "decision_score",
-            "espn_adp",
-            "ecr",
-            "p_survive_next_pick",
-            "recommendation",
+            "team",
+            "bye",
         ]
-    ].copy()
-
-    alt_display[
-        "p_survive_next_pick"
-    ] *= 100
-
-    alt_display = alt_display.rename(
-        columns={
-            "player": "Player",
-            "position": "Pos",
-            "decision_score": "Decision Score",
-            "espn_adp": "ESPN ADP",
-            "ecr": "ECR",
-            "p_survive_next_pick": "Survive %",
-            "recommendation": "Recommendation",
-        }
-    )
-
-    st.dataframe(
-        alt_display,
-        hide_index=True,
-        use_container_width=True,
-        column_config={
-            "Decision Score":
-                st.column_config.NumberColumn(
-                    format="%.1f"
-                ),
-            "ESPN ADP":
-                st.column_config.NumberColumn(
-                    format="%.1f"
-                ),
-            "ECR":
-                st.column_config.NumberColumn(
-                    format="%.1f"
-                ),
-            "Survive %":
-                st.column_config.NumberColumn(
-                    format="%.1f%%"
-                ),
-        },
     )
 
 
-# ---------------------------------------------------------
-# RECORD DRAFT PICK
-# ---------------------------------------------------------
+# =========================================================
+# BYE CONFLICT FUNCTIONS
+# =========================================================
+
+def bye_conflict_for_player(
+    player_row,
+) -> bool:
+
+    if roster_df.empty:
+        return False
+
+    player_bye = player_row.get(
+        "bye"
+    )
+
+    player_pos = player_row.get(
+        "position"
+    )
+
+    if pd.isna(player_bye):
+        return False
+
+    conflict = roster_df[
+        (roster_df["position"] == player_pos)
+        & (roster_df["bye"] == player_bye)
+    ]
+
+    return not conflict.empty
+
+
+def bye_conflict_names(
+    player_row,
+) -> list[str]:
+
+    if roster_df.empty:
+        return []
+
+    player_bye = player_row.get(
+        "bye"
+    )
+
+    player_pos = player_row.get(
+        "position"
+    )
+
+    if pd.isna(player_bye):
+        return []
+
+    conflicts = roster_df[
+        (roster_df["position"] == player_pos)
+        & (roster_df["bye"] == player_bye)
+    ]
+
+    return conflicts[
+        "player"
+    ].tolist()
+
+
+# =========================================================
+# OPPONENT DEMAND LABEL
+# =========================================================
+
+def opponent_demand_label(
+    demand_index: float,
+) -> str:
+    """
+    Convert the opponent-demand number into
+    something readable during the draft.
+    """
+
+    if pd.isna(demand_index):
+        return "Unknown"
+
+    if demand_index >= 1.12:
+        return "High"
+
+    if demand_index >= 1.04:
+        return "Slightly High"
+
+    if demand_index <= 0.88:
+        return "Low"
+
+    if demand_index <= 0.96:
+        return "Slightly Low"
+
+    return "Neutral"
+
+
+# =========================================================
+# TOP AVAILABLE
+# =========================================================
+
+st.subheader(
+    "Top Available"
+)
+
+
+top_available = (
+    recommendations
+    .head(7)
+    .copy()
+)
+
+
+leader = top_available.iloc[0]
+
+
+st.markdown(
+    (
+        '<div class="leader-box">'
+        f'Model leader: {leader["player"]} ({leader["position"]})'
+        f' &nbsp; | &nbsp; Decision Score {leader["decision_score"]:.1f}'
+        '</div>'
+    ),
+    unsafe_allow_html=True,
+)
+
+
+top_available[
+    "opponent_demand"
+] = (
+    top_available[
+        "opponent_demand_index"
+    ]
+    .apply(
+        opponent_demand_label
+    )
+)
+
+
+top_cols = [
+    "player",
+    "position",
+    "bye",
+    "decision_score",
+    "espn_adp",
+    "ecr",
+    "base_survive_next_pick",
+    "opponent_demand",
+    "p_survive_next_pick",
+    "recommendation",
+]
+
+
+top_display = top_available[
+    top_cols
+].copy()
+
+
+top_display[
+    "base_survive_next_pick"
+] *= 100
+
+
+top_display[
+    "p_survive_next_pick"
+] *= 100
+
+
+top_display = top_display.rename(
+    columns={
+        "player": "Player",
+        "position": "Pos",
+        "bye": "Bye",
+        "decision_score": "Decision",
+        "espn_adp": "ESPN ADP",
+        "ecr": "ECR",
+        "base_survive_next_pick": "Base Survive %",
+        "opponent_demand": "Opponent Demand",
+        "p_survive_next_pick": "Adjusted Survive %",
+        "recommendation": "Recommendation",
+    }
+)
+
+
+st.dataframe(
+    top_display,
+    hide_index=True,
+    use_container_width=True,
+    column_config={
+        "Decision":
+            st.column_config.NumberColumn(
+                format="%.1f"
+            ),
+
+        "ESPN ADP":
+            st.column_config.NumberColumn(
+                format="%.1f"
+            ),
+
+        "ECR":
+            st.column_config.NumberColumn(
+                format="%.1f"
+            ),
+
+        "Base Survive %":
+            st.column_config.NumberColumn(
+                format="%.1f%%"
+            ),
+
+        "Adjusted Survive %":
+            st.column_config.NumberColumn(
+                format="%.1f%%"
+            ),
+    },
+)
+
+
+# =========================================================
+# QUICK DRAFT
+# =========================================================
 
 st.divider()
 
 st.subheader(
-    "Record Draft Pick"
+    "Quick Draft"
 )
 
-
-st.caption(
-    "Quick picks — top 8 available players by ESPN ADP"
+st.markdown(
+    '<div class="section-subtitle">Top 8 available players by ESPN ADP</div>',
+    unsafe_allow_html=True,
 )
 
 
@@ -504,14 +979,69 @@ for start in range(
 
         with col:
 
-            st.markdown(
-                f"**{player['player']}**"
+            pos_class = str(
+                player["position"]
+            ).lower()
+
+
+            bye_value = (
+                int(player["bye"])
+                if pd.notna(
+                    player["bye"]
+                )
+                else "-"
             )
 
-            st.caption(
-                f"{player['position']} | "
-                f"ADP {player['espn_adp']:.1f} | "
-                f"ECR {player['ecr']:.1f}"
+
+            conflict = bye_conflict_for_player(
+                player
+            )
+
+
+            conflict_players = (
+                bye_conflict_names(
+                    player
+                )
+            )
+
+
+            if conflict:
+
+                names = ", ".join(
+                    conflict_players
+                )
+
+                conflict_line = (
+                    f'<div class="bye-warning">'
+                    f'Bye conflict with {names}'
+                    f'</div>'
+                )
+
+            else:
+
+                conflict_line = ""
+
+
+            card_html = (
+                f'<div class="draft-card draft-card-{pos_class}">'
+                f'<div class="player-name">{player["player"]}</div>'
+                f'<div class="player-line">'
+                f'{player["position"]} | '
+                f'{player["team"]} | '
+                f'Bye {bye_value}'
+                f'</div>'
+                f'<div class="player-line">'
+                f'ADP {player["espn_adp"]:.1f} | '
+                f'ECR {player["ecr"]:.1f}'
+                f'</div>'
+                f'{conflict_line}'
+                f'</div>'
+            )
+
+
+            st.markdown(
+                card_html,
+                unsafe_allow_html=True,
             )
 
 
@@ -545,14 +1075,97 @@ for start in range(
                 st.rerun()
 
 
-# ---------------------------------------------------------
-# SEARCH / FALLBACK
-# ---------------------------------------------------------
+# =========================================================
+# MY ROSTER
+# =========================================================
 
-st.markdown(
-    "##### Search any available player"
+st.divider()
+
+st.subheader(
+    "My Roster"
 )
 
+
+if not roster_df.empty:
+
+    roster_display = roster_df[
+        [
+            "player",
+            "team",
+            "position",
+            "bye",
+        ]
+    ].copy()
+
+
+    roster_display = roster_display.rename(
+        columns={
+            "player": "Player",
+            "team": "Team",
+            "position": "Pos",
+            "bye": "Bye",
+        }
+    )
+
+
+    st.dataframe(
+        roster_display,
+        hide_index=True,
+        use_container_width=True,
+    )
+
+else:
+
+    st.info(
+        "No players drafted to your team yet."
+    )
+
+
+# =========================================================
+# AVAILABLE PLAYER BOARD
+# =========================================================
+
+st.divider()
+
+st.subheader(
+    "Available Player Board"
+)
+
+
+# ---------------------------------------------------------
+# POSITION FILTER
+# ---------------------------------------------------------
+
+position_filter = st.multiselect(
+    "Positions",
+    options=[
+        "QB",
+        "RB",
+        "WR",
+        "TE",
+    ],
+    default=[
+        "QB",
+        "RB",
+        "WR",
+        "TE",
+    ],
+)
+
+
+# ---------------------------------------------------------
+# PLAYER SEARCH
+# ---------------------------------------------------------
+
+search = st.text_input(
+    "Player search",
+    placeholder="Type a player name...",
+)
+
+
+# ---------------------------------------------------------
+# RECORD ANY AVAILABLE PLAYER
+# ---------------------------------------------------------
 
 available_names = (
     recommendations[
@@ -565,9 +1178,52 @@ available_names = (
 
 
 selected_player = st.selectbox(
-    "Player selected",
+    "Record any available player",
     options=available_names,
 )
+
+
+selected_row = recommendations[
+    recommendations[
+        "player"
+    ]
+    == selected_player
+].iloc[0]
+
+
+selected_conflict = (
+    bye_conflict_for_player(
+        selected_row
+    )
+)
+
+
+if selected_conflict:
+
+    names = ", ".join(
+        bye_conflict_names(
+            selected_row
+        )
+    )
+
+
+    bye_value = (
+        int(
+            selected_row["bye"]
+        )
+        if pd.notna(
+            selected_row["bye"]
+        )
+        else "-"
+    )
+
+
+    st.warning(
+        f"Bye-week overlap: {selected_player} is a "
+        f"{selected_row['position']} with Bye {bye_value}. "
+        f"You already have {names} at the same position "
+        f"with that bye. You can still draft this player."
+    )
 
 
 button_col1, button_col2 = st.columns(2)
@@ -608,77 +1264,8 @@ with button_col2:
 
 
 # ---------------------------------------------------------
-# MY ROSTER
+# FILTER MAIN TABLE
 # ---------------------------------------------------------
-
-st.divider()
-
-st.subheader(
-    "My Roster"
-)
-
-
-roster = draft.get_roster()
-
-
-if roster:
-
-    roster_df = pd.DataFrame(
-        roster
-    )
-
-    roster_df = roster_df.rename(
-        columns={
-            "player": "Player",
-            "position": "Pos",
-        }
-    )
-
-    st.dataframe(
-        roster_df,
-        hide_index=True,
-        use_container_width=True,
-    )
-
-else:
-
-    st.info(
-        "No players drafted to your team yet."
-    )
-
-
-# ---------------------------------------------------------
-# PLAYER BOARD
-# ---------------------------------------------------------
-
-st.divider()
-
-st.subheader(
-    "Available Player Board"
-)
-
-
-position_filter = st.multiselect(
-    "Positions",
-    options=[
-        "QB",
-        "RB",
-        "WR",
-        "TE",
-    ],
-    default=[
-        "QB",
-        "RB",
-        "WR",
-        "TE",
-    ],
-)
-
-
-search = st.text_input(
-    "Player search"
-)
-
 
 display_board = recommendations[
     recommendations[
@@ -703,16 +1290,78 @@ if search:
     ]
 
 
+# ---------------------------------------------------------
+# BYE CONFLICT
+# ---------------------------------------------------------
+
+display_board[
+    "bye_conflict"
+] = display_board.apply(
+    bye_conflict_for_player,
+    axis=1,
+)
+
+
+display_board[
+    "bye_conflict"
+] = display_board[
+    "bye_conflict"
+].map(
+    {
+        True: "YES",
+        False: "",
+    }
+)
+
+
+# ---------------------------------------------------------
+# OPPONENT DEMAND
+# ---------------------------------------------------------
+
+display_board[
+    "opponent_demand"
+] = (
+    display_board[
+        "opponent_demand_index"
+    ]
+    .apply(
+        opponent_demand_label
+    )
+)
+
+
+# ---------------------------------------------------------
+# CONVERT PROBABILITIES TO PERCENTAGES
+# ---------------------------------------------------------
+
+display_board[
+    "base_survive_next_pick"
+] *= 100
+
+
+display_board[
+    "p_survive_next_pick"
+] *= 100
+
+
+# ---------------------------------------------------------
+# DISPLAY COLUMNS
+# ---------------------------------------------------------
+
 display_cols = [
     "player",
     "team",
     "position",
+    "bye",
     "ecr",
     "espn_adp",
     "market_gap",
     "vor",
     "decision_score",
+    "base_survive_next_pick",
+    "opponent_demand",
     "p_survive_next_pick",
+    "bye_conflict",
     "recommendation",
 ]
 
@@ -722,22 +1371,21 @@ display_board = display_board[
 ].copy()
 
 
-display_board[
-    "p_survive_next_pick"
-] *= 100
-
-
 display_board = display_board.rename(
     columns={
         "player": "Player",
         "team": "Team",
         "position": "Pos",
+        "bye": "Bye",
         "ecr": "ECR",
         "espn_adp": "ESPN ADP",
         "market_gap": "ADP Gap",
         "vor": "VOR",
-        "decision_score": "Decision Score",
-        "p_survive_next_pick": "Survive %",
+        "decision_score": "Decision",
+        "base_survive_next_pick": "Base Survive %",
+        "opponent_demand": "Opponent Demand",
+        "p_survive_next_pick": "Adjusted Survive %",
+        "bye_conflict": "Bye Conflict",
         "recommendation": "Recommendation",
     }
 )
@@ -753,23 +1401,33 @@ st.dataframe(
             st.column_config.NumberColumn(
                 format="%.1f"
             ),
+
         "ESPN ADP":
             st.column_config.NumberColumn(
                 format="%.1f"
             ),
+
         "ADP Gap":
             st.column_config.NumberColumn(
                 format="%+.1f"
             ),
+
         "VOR":
             st.column_config.NumberColumn(
                 format="%.1f"
             ),
-        "Decision Score":
+
+        "Decision":
             st.column_config.NumberColumn(
                 format="%.1f"
             ),
-        "Survive %":
+
+        "Base Survive %":
+            st.column_config.NumberColumn(
+                format="%.1f%%"
+            ),
+
+        "Adjusted Survive %":
             st.column_config.NumberColumn(
                 format="%.1f%%"
             ),
