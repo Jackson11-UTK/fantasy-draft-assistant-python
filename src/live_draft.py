@@ -27,7 +27,9 @@ class LiveDraft:
         self.drafted_players: list[str] = []
         self.my_roster: list[dict] = []
 
-        # Pick waiting to happen.
+        # Stores each action so the most recent pick can be undone.
+        self.history: list[dict] = []
+
         self.current_pick = 1
 
 
@@ -38,12 +40,6 @@ class LiveDraft:
     ):
         """
         Record one draft selection.
-
-        my_pick=False:
-            another team drafted the player
-
-        my_pick=True:
-            we drafted the player
         """
 
         available = available_players(
@@ -60,6 +56,15 @@ class LiveDraft:
             )
 
         player = match.iloc[0]
+
+        # Save action BEFORE changing state.
+        self.history.append(
+            {
+                "player": player_name,
+                "position": player["position"],
+                "my_pick": my_pick,
+            }
+        )
 
         self.board = mark_drafted(
             self.board,
@@ -81,12 +86,68 @@ class LiveDraft:
         self.current_pick += 1
 
 
+    def undo_last_pick(
+        self,
+    ):
+        """
+        Undo the most recent draft selection.
+        """
+
+        if not self.history:
+            raise ValueError(
+                "There are no picks to undo."
+            )
+
+        last = self.history.pop()
+
+        player_name = last["player"]
+
+        # Mark player available again.
+        mask = (
+            self.board["player"]
+            .str.strip()
+            .str.lower()
+            == player_name.strip().lower()
+        )
+
+        if "drafted" in self.board.columns:
+            self.board.loc[
+                mask,
+                "drafted"
+            ] = False
+
+        # Remove most recent drafted-player entry.
+        if self.drafted_players:
+            self.drafted_players.pop()
+
+        # If it was our player, remove it from our roster.
+        if last["my_pick"]:
+
+            for i in range(
+                len(self.my_roster) - 1,
+                -1,
+                -1,
+            ):
+
+                if (
+                    self.my_roster[i]["player"]
+                    == player_name
+                ):
+                    self.my_roster.pop(i)
+                    break
+
+        # Move draft back one overall pick.
+        self.current_pick = max(
+            1,
+            self.current_pick - 1,
+        )
+
+        return last
+
+
     def get_available(
         self,
     ) -> pd.DataFrame:
-        """
-        Return players who have not been drafted.
-        """
 
         return available_players(
             self.board
@@ -96,9 +157,6 @@ class LiveDraft:
     def get_roster(
         self,
     ) -> list[dict]:
-        """
-        Return our current roster.
-        """
 
         return self.my_roster.copy()
 
@@ -106,9 +164,6 @@ class LiveDraft:
     def get_drafted(
         self,
     ) -> list[str]:
-        """
-        Return all drafted players in draft order.
-        """
 
         return self.drafted_players.copy()
 
@@ -117,25 +172,8 @@ class LiveDraft:
         self,
         league_key: str,
     ) -> pd.DataFrame:
-        """
-        Run the complete recommendation model using
-        the current live draft state.
-
-        Accounts for:
-        - drafted players
-        - our roster
-        - league scoring
-        - VOR
-        - ECR / ESPN ADP
-        - survival probability
-        - roster needs
-        """
 
         result = self.board.copy()
-
-        # ---------------------------------------------
-        # PLAYER VALUE
-        # ---------------------------------------------
 
         result = add_vor(
             result,
@@ -146,10 +184,6 @@ class LiveDraft:
         result = add_draft_score(
             result
         )
-
-        # ---------------------------------------------
-        # NEXT-PICK SURVIVAL
-        # ---------------------------------------------
 
         draft_slot = self.league.get(
             "draft_slot"
@@ -168,11 +202,6 @@ class LiveDraft:
             teams=self.league["teams"],
         )
 
-        # ---------------------------------------------
-        # REMOVE DRAFTED / NON-DRAFTABLE PLAYERS
-        # BEFORE LABELING BEST PICK
-        # ---------------------------------------------
-
         result = available_players(
             result
         )
@@ -184,19 +213,11 @@ class LiveDraft:
             & result["razzball_name"].notna()
         ].copy()
 
-        # ---------------------------------------------
-        # ROSTER-AWARE DECISION MODEL
-        # ---------------------------------------------
-
         result = add_decision_metrics(
             result,
             roster=self.my_roster,
             league=self.league,
         )
-
-        # ---------------------------------------------
-        # BEST RECOMMENDATION FIRST
-        # ---------------------------------------------
 
         result = result.sort_values(
             "decision_score",
@@ -209,11 +230,9 @@ class LiveDraft:
     def reset(
         self,
     ):
-        """
-        Reset the entire draft.
-        """
 
         self.board = self.original_board.copy()
         self.drafted_players = []
         self.my_roster = []
+        self.history = []
         self.current_pick = 1

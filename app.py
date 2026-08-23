@@ -119,6 +119,13 @@ if st.sidebar.button(
     draft.reset()
     st.rerun()
 
+if st.sidebar.button(
+    "↩️ Undo Last Pick",
+    use_container_width=True,
+    disabled=len(draft.get_drafted()) == 0,
+):
+    draft.undo_last_pick()
+    st.rerun()
 
 # ---------------------------------------------------------
 # DRAFT TURN MATH
